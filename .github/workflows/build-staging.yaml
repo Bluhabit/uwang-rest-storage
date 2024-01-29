@@ -6,7 +6,7 @@ on:
   # trigger on main branch push (direct or via PR merge)
   push:
     branches:
-      - 'main'
+      - 'staging'
 
 permissions:
   contents: read

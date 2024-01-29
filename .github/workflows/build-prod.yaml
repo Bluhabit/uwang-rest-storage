@@ -20,7 +20,7 @@ concurrency: release
 
 jobs:
   pr-build:
-    name: Build Dev
+    name: Build Prod
     runs-on: ubuntu-latest
     # Required by 'git push'
     permissions:
