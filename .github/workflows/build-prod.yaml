@@ -1,0 +1,76 @@
+name: Create Prod Release
+
+on:
+  # allow to trigger job manually from UI
+  workflow_dispatch:
+  # trigger on main branch push (direct or via PR merge)
+  push:
+    branches:
+      - 'main'
+
+permissions:
+  contents: read
+
+env:
+  DOCKER_USER: ${{ secrets.REGISTRY_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
+
+# Disable parallel execution
+concurrency: release
+
+jobs:
+  pr-build:
+    name: Build Dev
+    runs-on: ubuntu-latest
+    # Required by 'git push'
+    permissions:
+      checks: write
+      contents: write
+      repository-projects: write
+    steps:
+      - uses: actions/checkout@v3
+      # Generate RELEASE_VERSION var (i.e. v12-63hef73)
+      - name: Create Prod Version
+        run: echo "RELEASE_VERSION=${{github.run_number}}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      # Create but not yet push release tag before Gradle run
+      - name: Create Prod Tag
+        run: |
+          git tag ${{env.RELEASE_VERSION}}
+
+      - name: docker login
+        run: |
+          docker login https://registry.bluhabit.id -u $DOCKER_USER -p $DOCKER_PASSWORD
+
+      - name: Build Prod image
+        run: docker build -t registry.bluhabit.id/uwang-rest-storage:${{env.RELEASE_VERSION}} . -f ./dockerfile/dev.Dockerfile --no-cache
+
+      - name: Push Prod
+        run: docker push registry.bluhabit.id/uwang-rest-storage:${{env.RELEASE_VERSION}}
+      # Pushing release tag only if everything before passed
+      - name: Push Release Tag
+        run: git push origin ${{env.RELEASE_VERSION}}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: pr-build
+    name: Deploy to VPS
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Get Prod Version
+        run: echo "RELEASE_VERSION=${{github.run_number}}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+      - name: Connect with SSH and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST}}
+          username: ${{secrets.SSH_USER}}
+          password: ${{secrets.SSH_PASSWORD}}
+          port: ${{secrets.SSH_PORT}}
+          script: |
+            cd vps-config/application/uwang-rest-storage/prod
+            docker stop uwang-rest-storage
+            docker rm uwang-rest-storage
+            docker pull registry.bluhabit.id/uwang-rest-storage:${{env.RELEASE_VERSION}}
+            docker run --env-file .env -v ./data:/data:rw --network app-net --add-host "host.docker.internal:host-gateway" --name uwang-rest-storage -p 7007:8000  -d registry.bluhabit.id/uwang-rest-storage:${{env.RELEASE_VERSION}}
