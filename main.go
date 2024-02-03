@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,4 +30,11 @@ func main() {
 		})
 	})
 	router.Run(":8080")
+
+	router.POST("/upload-avatar", func(context *gin.Context) {
+
+	})
+	if err := router.Run(":8000"); err != nil {
+		log.Fatal("Gagal memulai server")
+	}
 }
