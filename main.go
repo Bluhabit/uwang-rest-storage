@@ -1,21 +1,32 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"log"
+	"fmt"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	r := gin.Default()
+	router := gin.Default()
 
-	r.GET("/", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"Message": "Halo blue",
 		})
 	})
+	router.POST("/post/:name", func(context *gin.Context) {
+		id := context.Query("id")
+		page := context.DefaultQuery("page", "0")
+		name := context.PostForm("name")
+		message := context.PostForm("message")
 
-	if err := r.Run(":8080"); err != nil {
-		log.Fatal("Gagal memulai server")
-	}
+		fmt.Printf("id: %s; page: %s; name: %s, message: %s", id, page, name, message)
+		context.JSON(200,gin.H{
+			"status_code": 1001, //status kode merepresentasikan kondisi
+			"data": true,
+			"message": "Data Diterima",
+		})
+	})
+	router.Run(":8080")
 }
