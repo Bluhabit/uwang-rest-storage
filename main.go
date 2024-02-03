@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
-	"net/http"
+	"github.com/Bluhabit/uwang-rest-storage/routes"
 	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	router := gin.Default()
+
+	routes.InitRoutes(router)
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -23,10 +26,10 @@ func main() {
 		message := context.PostForm("message")
 
 		fmt.Printf("id: %s; page: %s; name: %s, message: %s", id, page, name, message)
-		context.JSON(200,gin.H{
+		context.JSON(200, gin.H{
 			"status_code": 1001, //status kode merepresentasikan kondisi
-			"data": true,
-			"message": "Data Diterima",
+			"data":        true,
+			"message":     "Data Diterima",
 		})
 	})
 	router.Run(":8080")
