@@ -15,6 +15,9 @@ func main() {
 		})
 	})
 
+	r.POST("/upload-avatar", func(context *gin.Context) {
+
+	})
 	if err := r.Run(":8000"); err != nil {
 		log.Fatal("Gagal memulai server")
 	}
