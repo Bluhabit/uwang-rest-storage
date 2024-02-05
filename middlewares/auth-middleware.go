@@ -78,7 +78,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			context.Abort()
 			return
 		}
-		context.Set("user", claims)
+		context.Set("session_id", claims.Sub)
 		context.Next()
 	}
 }
