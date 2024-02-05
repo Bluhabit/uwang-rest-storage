@@ -38,12 +38,12 @@ func (repo *ProfileRespository) UploadProfilePicture(session_id string, file *mu
 	redis_key := common.CreateRedisKeyUserSession(session_id)
 	session := repo.cache.HGetAll(ctx.Background(), redis_key)
 	user := session.Val()
-	user_id := user["user_id"]
+	userId := user["user_id"]
 	fmt.Println(session)
-	if len(user_id) < 1 {
+	if len(userId) < 1 {
 		return response.BadRequest("", "Sesi tidak ditemukan.")
 	}
-	f, err := os.OpenFile(fmt.Sprintf("./data/%s.png", user_id), os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile(fmt.Sprintf("./data/%s.png", userId), os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return response.BadRequest("", "Gagal menyimpan file")
 	}
@@ -60,8 +60,8 @@ func (repo *ProfileRespository) UploadProfilePicture(session_id string, file *mu
 	}
 
 	bucketName := "uwang-dev"
-	objectName := fmt.Sprintf("profile-picture/%s.png", user_id)
-	filePath := fmt.Sprintf("data/%s.png", user_id)
+	objectName := fmt.Sprintf("profile-picture/%s.png", userId)
+	filePath := fmt.Sprintf("data/%s.png", userId)
 	contentType := "image/png"
 
 	fileInfo, err := repo.minio.FPutObject(ctx.Background(), bucketName, objectName, filePath, minio.PutObjectOptions{ContentType: contentType})
@@ -70,11 +70,11 @@ func (repo *ProfileRespository) UploadProfilePicture(session_id string, file *mu
 	}
 
 	// cari cara hapus file di uploads
-	err = os.Remove(fmt.Sprintf("./data/%s.png", user_id))
+	err = os.Remove(fmt.Sprintf("./data/%s.png", userId))
 	if err != nil {
 		return response.BadRequest("", "Gagal menyimpan file [4].")
 	}
 
 	fmt.Print(fileInfo)
-	return response.Success("", "Berhasil menyimpan foto.")
+	return response.Success(fmt.Sprintf("%s.png", userId), "Berhasil menyimpan foto.")
 }
