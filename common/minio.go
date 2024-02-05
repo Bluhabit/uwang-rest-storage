@@ -9,9 +9,11 @@ import (
 
 func GetMinioClient() *minio.Client {
 	var err error
-	err = godotenv.Load()
-	if err != nil {
-		return nil
+	if len(os.Getenv("MINIO_ENDPOINT")) < 1 {
+		err = godotenv.Load()
+		if err != nil {
+			return nil
+		}
 	}
 
 	endpoint := os.Getenv("MINIO_ENDPOINT")

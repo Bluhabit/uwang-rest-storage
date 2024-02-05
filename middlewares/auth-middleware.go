@@ -1,10 +1,12 @@
 package middlewares
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/Bluhabit/uwang-rest-storage/common"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"strings"
 )
 
 type authHeader struct {
@@ -54,6 +56,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		fmt.Println(header.Token)
 		idTokenHeader := strings.Replace(header.Token, "Bearer ", "", -1)
 		if len(idTokenHeader) < 2 {
 			context.JSON(401, gin.H{
@@ -65,6 +68,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		fmt.Println(idTokenHeader)
 		//validate token
 		claims := common.DecodeJWT(idTokenHeader)
 		if claims == nil {
@@ -76,6 +80,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			context.Abort()
 			return
 		}
+		fmt.Println(claims)
 
 		if len(claims.Sub) < 1 {
 			context.JSON(401, gin.H{

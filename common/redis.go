@@ -14,9 +14,11 @@ var (
 func GetRedisConnection() *redis.Client {
 	if cache == nil {
 		var err error
-		err = godotenv.Load()
-		if err != nil {
-			return nil
+		if len(os.Getenv("REDIS_ADDRESS")) < 1 {
+			err = godotenv.Load()
+			if err != nil {
+				return nil
+			}
 		}
 		redisAdd := os.Getenv("REDIS_ADDRESS")
 		redisUser := os.Getenv("REDIS_USER")

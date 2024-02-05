@@ -17,9 +17,11 @@ type UserClaims struct {
 
 func EncodeJWT(claims UserClaims) string {
 	var err error
-	err = godotenv.Load()
-	if err != nil {
-		return ""
+	if len(os.Getenv("JWT_SECRET")) < 1 {
+		err = godotenv.Load()
+		if err != nil {
+			return ""
+		}
 	}
 	key := []byte(os.Getenv("JWT_SECRET"))
 
@@ -33,9 +35,11 @@ func EncodeJWT(claims UserClaims) string {
 
 func DecodeJWT(token string) *UserClaims {
 	var err error
-	err = godotenv.Load()
-	if err != nil {
-		return nil
+	if len(os.Getenv("JWT_SECRET")) < 1 {
+		err = godotenv.Load()
+		if err != nil {
+			return nil
+		}
 	}
 	key := []byte(os.Getenv("JWT_SECRET"))
 	decoder, err := jwt.ParseWithClaims(token, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
