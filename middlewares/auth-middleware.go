@@ -21,7 +21,6 @@ type invalidArgument struct {
 func AuthMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		header := authHeader{}
-
 		if err := context.ShouldBindHeader(&header); err != nil {
 			if errs, ok := err.(validator.ValidationErrors); ok {
 				var invalidArgs []invalidArgument
@@ -55,25 +54,34 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		idTokenHeader := strings.Split(header.Token, "Bearer ")
-
+		idTokenHeader := strings.Replace(header.Token, "Bearer ", "", -1)
 		if len(idTokenHeader) < 2 {
 			context.JSON(401, gin.H{
 				"status_code": 401,
 				"data":        nil,
-				"message":     "Token not provided",
+				"message":     "Token not provided [1]",
 			})
 			context.Abort()
 			return
 		}
 
 		//validate token
-		claims := common.DecodeJWT(idTokenHeader[1])
+		claims := common.DecodeJWT(idTokenHeader)
 		if claims == nil {
 			context.JSON(401, gin.H{
 				"status_code": 401,
 				"data":        nil,
 				"message":     "Token not valid",
+			})
+			context.Abort()
+			return
+		}
+
+		if len(claims.Sub) < 1 {
+			context.JSON(401, gin.H{
+				"status_code": 401,
+				"data":        nil,
+				"message":     "UnAuthorized",
 			})
 			context.Abort()
 			return

@@ -1,12 +1,11 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"github.com/Bluhabit/uwang-rest-storage/common"
 	"github.com/Bluhabit/uwang-rest-storage/routes"
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
 )
 
 func main() {
@@ -22,8 +21,6 @@ func main() {
 			"Message": dec.Sub,
 		})
 	})
-
-	router.Run(":8080")
 
 	if err := router.Run(":8000"); err != nil {
 		log.Fatal("Gagal memulai server")
