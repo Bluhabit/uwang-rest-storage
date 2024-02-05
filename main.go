@@ -1,24 +1,31 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+
+	"github.com/Bluhabit/uwang-rest-storage/common"
+	"github.com/Bluhabit/uwang-rest-storage/routes"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	r := gin.Default()
+	router := gin.Default()
+	common.GetDbConnection()
+	common.GetRedisConnection()
+	common.GetMinioClient()
+	routes.InitRoutes(router)
 
-	r.GET("/", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
+		dec := common.DecodeJWT("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJibHVoYWJpdC5pZCIsInN1YiI6IlRyaWFuIiwiaWF0IjoxNzA3MDk3ODM4LCJleHAiOjE3MDcxMDE0Mzh9.XFB7fjyeHffSrypl4NRO63J-RxZHgA-fRmt7ZIsxRIQ")
 		c.JSON(http.StatusOK, gin.H{
-			"Message": "Halo blue",
+			"Message": dec.Sub,
 		})
 	})
 
-	r.POST("/upload-avatar", func(context *gin.Context) {
+	router.Run(":8080")
 
-	})
-	if err := r.Run(":8000"); err != nil {
+	if err := router.Run(":8000"); err != nil {
 		log.Fatal("Gagal memulai server")
 	}
 }

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 	"os"
@@ -11,7 +12,7 @@ type UserClaims struct {
 	Sub string `json:"sub"`
 	Iat int64  `json:"iat"`
 	Exp int64  `json:"exp"`
-	jwt.Claims
+	*jwt.RegisteredClaims
 }
 
 func EncodeJWT(claims UserClaims) string {
@@ -37,9 +38,12 @@ func DecodeJWT(token string) *UserClaims {
 		return nil
 	}
 	key := []byte(os.Getenv("JWT_SECRET"))
-	decoder, _ := jwt.ParseWithClaims(token, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+	decoder, err := jwt.ParseWithClaims(token, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return key, nil
 	})
+	if err != nil {
+		_ = fmt.Sprintf("%s", err)
+		return nil
+	}
 	return decoder.Claims.(*UserClaims)
-
 }
