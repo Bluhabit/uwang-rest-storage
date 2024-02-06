@@ -49,6 +49,7 @@ func (repo *ProfileRespository) UploadProfilePicture(session_id string, file *mu
 	}
 	defer f.Close()
 
+	//
 	reader, err := file.Open()
 	if err != nil {
 		return response.BadRequest("", "Gagal menyimpan file [1].")
