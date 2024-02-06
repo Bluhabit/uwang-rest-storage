@@ -6,7 +6,7 @@ on:
   # trigger on main branch push (direct or via PR merge)
   push:
     branches:
-      - 'staging'
+      - "staging"
 
 permissions:
   contents: read
@@ -73,4 +73,4 @@ jobs:
             docker stop uwang-rest-storage-staging
             docker rm uwang-rest-storage-staging
             docker pull registry.bluhabit.id/uwang-rest-storage:staging-${{env.RELEASE_VERSION}}
-            docker run --env-file .env -v ./data:/data:rw --network app-net --add-host "host.docker.internal:host-gateway" --name uwang-rest-storage-staging -p 7008:8000  -d registry.bluhabit.id/uwang-rest-storage:staging-${{env.RELEASE_VERSION}}
+            docker run --env-file .env -v ./data:/app/data:rw --network app-net --add-host "host.docker.internal:host-gateway" --name uwang-rest-storage-staging -p 7008:8000  -d registry.bluhabit.id/uwang-rest-storage:staging-${{env.RELEASE_VERSION}}
